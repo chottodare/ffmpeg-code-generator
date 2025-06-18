@@ -422,7 +422,7 @@
         }
 
         body.dark-mode .header h1 {
-            color: #ecf0f1;
+            color: #ecf0f0;
         }
 
         body.dark-mode .header p {
@@ -521,6 +521,7 @@
         }
 
         body.dark-mode .copy-btn:hover {
+            transform: translateY(-2px);
             box-shadow: 0 10px 25px rgba(76, 175, 80, 0.4);
         }
 
@@ -1025,19 +1026,20 @@
             
             // Update file input placeholders based on OS
             const placeholders = {
-                'sub-input-file': isWindows ? 'C:\\Videos\\film.mkv' : '~/Movies/film.mkv',
-                'sub-output-file': isWindows ? 'C:\\Videos\\napisy.srt' : '~/Movies/napisy.srt',
-                'conv-input-file': isWindows ? 'C:\\Videos\\film.mkv' : '~/Movies/film.mkv', 
-                'conv-output-file': isWindows ? 'C:\\Videos\\film.mp4' : '~/Movies/film.mp4',
-                'audio-input-file': isWindows ? 'C:\\Videos\\film.mkv' : '~/Movies/film.mkv',
-                'audio-output-file': isWindows ? 'C:\\Videos\\audio.mp3' : '~/Movies/audio.mp3',
-                'cut-input-file': isWindows ? 'C:\\Videos\\film.mkv' : '~/Movies/film.mkv',
-                'cut-output-file': isWindows ? 'C:\\Videos\\fragment.mp4' : '~/Movies/fragment.mp4',
-                'merge-files': isWindows ? 'C:\\Videos\\film1.mp4,C:\\Videos\\film2.mp4' : '~/Movies/film1.mp4,~/Movies/film2.mp4',
-                'merge-output-file': isWindows ? 'C:\\Videos\\połączone.mp4' : '~/Movies/połączone.mp4',
-                'add-sub-video-file': isWindows ? 'C:\\Videos\\film.mp4' : '~/Movies/film.mp4',
-                'add-sub-subtitle-file': isWindows ? 'C:\\Videos\\napisy.srt' : '~/Movies/napisy.srt',
-                'add-sub-output-file': isWindows ? 'C:\\Videos\\film_z_napisami.mp4' : '~/Movies/film_z_napisami.mp4'
+                // Zmienione ścieżki dla macOS
+                'sub-input-file': isWindows ? 'C:\\Videos\\film.mkv' : '/Users/chottodare/Desktop/nazwaFOLDERU/film.mkv',
+                'sub-output-file': isWindows ? 'C:\\Videos\\napisy.srt' : '/Users/chottodare/Desktop/nazwaFOLDERU/napisy.srt',
+                'conv-input-file': isWindows ? 'C:\\Videos\\film.mkv' : '/Users/chottodare/Desktop/nazwaFOLDERU/film.mkv', 
+                'conv-output-file': isWindows ? 'C:\\Videos\\film.mp4' : '/Users/chottodare/Desktop/nazwaFOLDERU/film.mp4',
+                'audio-input-file': isWindows ? 'C:\\Videos\\film.mkv' : '/Users/chottodare/Desktop/nazwaFOLDERU/film.mkv',
+                'audio-output-file': isWindows ? 'C:\\Videos\\audio.mp3' : '/Users/chottodare/Desktop/nazwaFOLDERU/audio.mp3',
+                'cut-input-file': isWindows ? 'C:\\Videos\\film.mkv' : '/Users/chottodare/Desktop/nazwaFOLDERU/film.mkv',
+                'cut-output-file': isWindows ? 'C:\\Videos\\fragment.mp4' : '/Users/chottodare/Desktop/nazwaFOLDERU/fragment.mp4',
+                'merge-files': isWindows ? 'C:\\Videos\\film1.mp4,C:\\Videos\\film2.mp4' : '/Users/chottodare/Desktop/nazwaFOLDERU/film1.mp4,/Users/chottodare/Desktop/nazwaFOLDERU/film2.mp4',
+                'merge-output-file': isWindows ? 'C:\\Videos\\połączone.mp4' : '/Users/chottodare/Desktop/nazwaFOLDERU/połączone.mp4',
+                'add-sub-video-file': isWindows ? 'C:\\Videos\\film.mp4' : '/Users/chottodare/Desktop/nazwaFOLDERU/film.mp4',
+                'add-sub-subtitle-file': isWindows ? 'C:\\Videos\\napisy.srt' : '/Users/chottodare/Desktop/nazwaFOLDERU/napisy.srt',
+                'add-sub-output-file': isWindows ? 'C:\\Videos\\film_z_napisami.mp4' : '/Users/chottodare/Desktop/nazwaFOLDERU/film_z_napisami.mp4'
             };
             
             // Update all placeholders
@@ -1045,9 +1047,9 @@
                 const element = document.getElementById(id);
                 if (element) {
                     element.placeholder = placeholders[id];
-                    // Update value only if it's still the default
-                    if (element.value === '' || element.value.includes(isWindows ? '~/Movies/' : 'C:\\Videos\\')) {
-                        element.value = placeholders[id].split(/[\/\\]/).pop(); // Just filename for cleaner look
+                    // Update value only if it's still the default (or contains old placeholder text)
+                    if (element.value === '' || element.value.includes('~/Movies/') || element.value.includes('C:\\Videos\\') || element.value === element.placeholder.split(/[\/\\]/).pop()) {
+                        element.value = placeholders[id].split(/[\/\\]/).pop(); // Keeps just the filename for cleaner look
                     }
                 }
             });
@@ -1117,7 +1119,7 @@
                         const file = fileInput.files[0];
                         // In a web browser, file.path is not available for security reasons.
                         // You'll get file.name. For Electron/NW.js, file.path would work.
-                        const filePath = file.name; 
+                        const filePath = file.name; // This will only give the filename in browsers
                         targetInput.value = filePath;
                         generateCommand(); // Regenerate command after selecting file
                     }
