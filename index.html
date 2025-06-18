@@ -16,6 +16,7 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 20px;
+            transition: background 0.3s ease, color 0.3s ease; /* Dla płynnego przejścia dark mode */
         }
 
         .container {
@@ -26,6 +27,7 @@
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
             overflow: hidden;
             backdrop-filter: blur(10px);
+            transition: background 0.3s ease, box-shadow 0.3s ease;
         }
 
         .header {
@@ -34,18 +36,21 @@
             padding: 30px;
             text-align: center;
             position: relative;
+            transition: background 0.3s ease;
         }
 
         .header h1 {
             font-size: 2.5em;
             margin-bottom: 10px;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            transition: color 0.3s ease;
         }
 
         .header p {
             font-size: 1.1em;
             opacity: 0.9;
             margin-bottom: 20px;
+            transition: opacity 0.3s ease;
         }
 
         /* OS Selector */
@@ -166,6 +171,7 @@
             margin-bottom: 30px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
             display: none;
+            transition: background 0.3s ease, box-shadow 0.3s ease;
         }
 
         .options-panel.active {
@@ -190,12 +196,14 @@
             background: #f8f9ff;
             border-radius: 10px;
             border-left: 4px solid #667eea;
+            transition: background 0.3s ease, border-left-color 0.3s ease;
         }
 
         .option-group h4 {
             color: #2a5298;
             margin-bottom: 15px;
             font-size: 1.1em;
+            transition: color 0.3s ease;
         }
 
         .form-row {
@@ -215,6 +223,7 @@
             color: #333;
             margin-bottom: 5px;
             font-size: 0.9em;
+            transition: color 0.3s ease;
         }
 
         input, select {
@@ -224,6 +233,7 @@
             font-size: 1em;
             transition: all 0.3s ease;
             background: white;
+            color: #333;
         }
 
         input:focus, select:focus {
@@ -245,12 +255,14 @@
             border: 2px solid #333;
             position: relative;
             overflow-x: auto;
+            transition: background 0.3s ease, color 0.3s ease, border 0.3s ease;
         }
 
         .command-output::before {
             content: '$ ';
             color: #ffff00;
             font-weight: bold;
+            transition: color 0.3s ease;
         }
 
         .copy-btn {
@@ -281,16 +293,19 @@
             border-radius: 15px;
             padding: 20px;
             margin-top: 30px;
+            transition: background 0.3s ease, border 0.3s ease;
         }
 
         .tips h3 {
             color: #856404;
             margin-bottom: 10px;
+            transition: color 0.3s ease;
         }
 
         .tips ul {
             color: #856404;
             padding-left: 20px;
+            transition: color 0.3s ease;
         }
 
         .tips li {
@@ -313,6 +328,7 @@
             animation: slideIn 0.8s ease-out forwards, slideOut 0.8s ease-in 4.2s forwards;
             backdrop-filter: blur(10px);
             border: 2px solid rgba(255, 255, 255, 0.2);
+            transition: background 0.3s ease, border 0.3s ease;
         }
 
         .tips-banner.show {
@@ -374,6 +390,172 @@
             letter-spacing: 1px;
         }
 
+        /* File Picker Button Styles */
+        .file-picker-btn {
+            background: #e0e0e0;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 15px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background 0.3s ease;
+            flex-shrink: 0; /* Zapobiega zmniejszaniu się przycisku */
+        }
+
+        .file-picker-btn:hover {
+            background: #d0d0d0;
+        }
+
+        /* Dark Mode Styles */
+        body.dark-mode {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: #ecf0f1;
+        }
+
+        body.dark-mode .container {
+            background: rgba(44, 62, 80, 0.95);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        body.dark-mode .header {
+            background: linear-gradient(135deg, #1e2a36 0%, #293d4a 100%);
+        }
+
+        body.dark-mode .header h1 {
+            color: #ecf0f1;
+        }
+
+        body.dark-mode .header p {
+            color: #bdc3c7;
+        }
+
+        body.dark-mode .os-option {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        body.dark-mode .os-option:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        body.dark-mode .os-option.active {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 5px 20px rgba(255, 255, 255, 0.1);
+        }
+
+        body.dark-mode .operation-card {
+            background: #34495e;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        body.dark-mode .operation-card::before {
+            background: linear-gradient(90deg, transparent, rgba(76, 126, 234, 0.2), transparent);
+        }
+
+        body.dark-mode .operation-card:hover {
+            border-color: #4CAF50; /* Zmieniony kolor na hover dla dark mode */
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+        }
+
+        body.dark-mode .operation-card.active {
+            border-color: #4CAF50;
+            background: linear-gradient(135deg, #3a536b 0%, #4a6681 100%);
+        }
+
+        body.dark-mode .operation-card h3 {
+            color: #ecf0f1;
+        }
+
+        body.dark-mode .operation-card p {
+            color: #bdc3c7;
+        }
+
+        body.dark-mode .options-panel {
+            background: #34495e;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        body.dark-mode .option-group {
+            background: #3d566e;
+            border-left-color: #4CAF50;
+        }
+
+        body.dark-mode .option-group h4 {
+            color: #ecf0f1;
+        }
+
+        body.dark-mode label {
+            color: #ecf0f1;
+        }
+
+        body.dark-mode input,
+        body.dark-mode select {
+            background: #2c3e50;
+            border-color: #555;
+            color: #ecf0f1;
+        }
+
+        body.dark-mode input:focus,
+        body.dark-mode select:focus {
+            outline: none;
+            border-color: #4CAF50;
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
+        }
+
+        body.dark-mode .command-output {
+            background: #0a0a0a;
+            color: #00ff00;
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8);
+            border: 2px solid #555;
+        }
+
+        body.dark-mode .command-output::before {
+            color: #ffff00;
+        }
+
+        body.dark-mode .copy-btn {
+            background: linear-gradient(135deg, #4CAF50 0%, #66bb6a 100%);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3);
+        }
+
+        body.dark-mode .copy-btn:hover {
+            box-shadow: 0 10px 25px rgba(76, 175, 80, 0.4);
+        }
+
+        body.dark-mode .copy-btn.active {
+            background: linear-gradient(135deg, #00897b 0%, #00796b 100%);
+        }
+
+        body.dark-mode .tips {
+            background: linear-gradient(135deg, #424242 0%, #616161 100%);
+            border: 1px solid #757575;
+        }
+
+        body.dark-mode .tips h3 {
+            color: #e0e0e0;
+        }
+
+        body.dark-mode .tips ul {
+            color: #bdc3c7;
+        }
+
+        body.dark-mode .tips-banner {
+            background: linear-gradient(135deg, #4CAF50 0%, #66bb6a 100%);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        body.dark-mode .file-picker-btn {
+            background: #555;
+            color: #eee;
+        }
+
+        body.dark-mode .file-picker-btn:hover {
+            background: #777;
+        }
+
+
         @media (max-width: 768px) {
             .container {
                 margin: 10px;
@@ -391,7 +573,6 @@
 </head>
 <body>
     <div class="container">
-        <!-- Animated Tips Banner -->
         <div class="tips-banner" id="tips-banner">
             <div class="tip-category" id="tip-category"></div>
             <div class="tip-content">
@@ -405,6 +586,8 @@
             <h1>🎬 FFmpeg GUI Generator</h1>
             <p>Generuj komendy FFmpeg z łatwością - bez znajomości składni!</p>
             
+            <button id="darkModeToggle" style="position: absolute; top: 15px; left: 20px; background: rgba(255,255,255,0.15); border: none; border-radius: 20px; padding: 8px 15px; color: white; cursor: pointer; font-size: 0.85em; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2);">🌙 Tryb Ciemny</button>
+
             <div class="os-selector">
                 <div class="os-option active" data-os="macos">
                     <span class="os-icon">🍎</span>
@@ -445,18 +628,23 @@
                 </div>
             </div>
 
-            <!-- Extract Subtitles Panel -->
             <div class="options-panel" id="extract-subtitles-panel">
                 <div class="option-group">
                     <h4>Plik Źródłowy</h4>
                     <div class="form-row">
                         <div class="form-group">
                             <label for="sub-input-file">Plik wejściowy:</label>
-                            <input type="text" id="sub-input-file" placeholder="np. film.mkv" value="film.mkv">
+                            <div style="display: flex; gap: 10px;">
+                                <input type="text" id="sub-input-file" placeholder="np. film.mkv" value="film.mkv">
+                                <button type="button" class="file-picker-btn" data-target="sub-input-file">📁</button>
+                            </div>
                         </div>
                         <div class="form-group">
                             <label for="sub-output-file">Plik wyjściowy:</label>
-                            <input type="text" id="sub-output-file" placeholder="np. napisy.srt" value="napisy.srt">
+                            <div style="display: flex; gap: 10px;">
+                                <input type="text" id="sub-output-file" placeholder="np. napisy.srt" value="napisy.srt">
+                                <button type="button" class="file-picker-btn" data-target="sub-output-file">📁</button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -485,18 +673,23 @@
                 </div>
             </div>
 
-            <!-- Convert Video Panel -->
             <div class="options-panel" id="convert-video-panel">
                 <div class="option-group">
                     <h4>Pliki</h4>
                     <div class="form-row">
                         <div class="form-group">
                             <label for="conv-input-file">Plik wejściowy:</label>
-                            <input type="text" id="conv-input-file" placeholder="np. film.mkv" value="film.mkv">
+                            <div style="display: flex; gap: 10px;">
+                                <input type="text" id="conv-input-file" placeholder="np. film.mkv" value="film.mkv">
+                                <button type="button" class="file-picker-btn" data-target="conv-input-file">📁</button>
+                            </div>
                         </div>
                         <div class="form-group">
                             <label for="conv-output-file">Plik wyjściowy:</label>
-                            <input type="text" id="conv-output-file" placeholder="np. film.mp4" value="film.mp4">
+                            <div style="display: flex; gap: 10px;">
+                                <input type="text" id="conv-output-file" placeholder="np. film.mp4" value="film.mp4">
+                                <button type="button" class="file-picker-btn" data-target="conv-output-file">📁</button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -548,18 +741,23 @@
                 </div>
             </div>
 
-            <!-- Extract Audio Panel -->
             <div class="options-panel" id="extract-audio-panel">
                 <div class="option-group">
                     <h4>Pliki</h4>
                     <div class="form-row">
                         <div class="form-group">
                             <label for="audio-input-file">Plik wejściowy:</label>
-                            <input type="text" id="audio-input-file" placeholder="np. film.mkv" value="film.mkv">
+                            <div style="display: flex; gap: 10px;">
+                                <input type="text" id="audio-input-file" placeholder="np. film.mkv" value="film.mkv">
+                                <button type="button" class="file-picker-btn" data-target="audio-input-file">📁</button>
+                            </div>
                         </div>
                         <div class="form-group">
                             <label for="audio-output-file">Plik wyjściowy:</label>
-                            <input type="text" id="audio-output-file" placeholder="np. audio.mp3" value="audio.mp3">
+                            <div style="display: flex; gap: 10px;">
+                                <input type="text" id="audio-output-file" placeholder="np. audio.mp3" value="audio.mp3">
+                                <button type="button" class="file-picker-btn" data-target="audio-output-file">📁</button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -583,18 +781,23 @@
                 </div>
             </div>
 
-            <!-- Cut Video Panel -->
             <div class="options-panel" id="cut-video-panel">
                 <div class="option-group">
                     <h4>Pliki</h4>
                     <div class="form-row">
                         <div class="form-group">
                             <label for="cut-input-file">Plik wejściowy:</label>
-                            <input type="text" id="cut-input-file" placeholder="np. film.mkv" value="film.mkv">
+                            <div style="display: flex; gap: 10px;">
+                                <input type="text" id="cut-input-file" placeholder="np. film.mkv" value="film.mkv">
+                                <button type="button" class="file-picker-btn" data-target="cut-input-file">📁</button>
+                            </div>
                         </div>
                         <div class="form-group">
                             <label for="cut-output-file">Plik wyjściowy:</label>
-                            <input type="text" id="cut-output-file" placeholder="np. fragment.mp4" value="fragment.mp4">
+                            <div style="display: flex; gap: 10px;">
+                                <input type="text" id="cut-output-file" placeholder="np. fragment.mp4" value="fragment.mp4">
+                                <button type="button" class="file-picker-btn" data-target="cut-output-file">📁</button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -613,7 +816,6 @@
                 </div>
             </div>
 
-            <!-- Merge Videos Panel -->
             <div class="options-panel" id="merge-videos-panel">
                 <div class="option-group">
                     <h4>Pliki do połączenia</h4>
@@ -624,28 +826,39 @@
                         </div>
                         <div class="form-group">
                             <label for="merge-output-file">Plik wyjściowy:</label>
-                            <input type="text" id="merge-output-file" placeholder="np. połączone.mp4" value="połączone.mp4">
+                            <div style="display: flex; gap: 10px;">
+                                <input type="text" id="merge-output-file" placeholder="np. połączone.mp4" value="połączone.mp4">
+                                <button type="button" class="file-picker-btn" data-target="merge-output-file">📁</button>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Add Subtitles Panel -->
             <div class="options-panel" id="add-subtitles-panel">
                 <div class="option-group">
                     <h4>Pliki</h4>
                     <div class="form-row">
                         <div class="form-group">
                             <label for="add-sub-video-file">Plik wideo:</label>
-                            <input type="text" id="add-sub-video-file" placeholder="np. film.mp4" value="film.mp4">
+                            <div style="display: flex; gap: 10px;">
+                                <input type="text" id="add-sub-video-file" placeholder="np. film.mp4" value="film.mp4">
+                                <button type="button" class="file-picker-btn" data-target="add-sub-video-file">📁</button>
+                            </div>
                         </div>
                         <div class="form-group">
                             <label for="add-sub-subtitle-file">Plik napisów:</label>
-                            <input type="text" id="add-sub-subtitle-file" placeholder="np. napisy.srt" value="napisy.srt">
+                            <div style="display: flex; gap: 10px;">
+                                <input type="text" id="add-sub-subtitle-file" placeholder="np. napisy.srt" value="napisy.srt">
+                                <button type="button" class="file-picker-btn" data-target="add-sub-subtitle-file">📁</button>
+                            </div>
                         </div>
                         <div class="form-group">
                             <label for="add-sub-output-file">Plik wyjściowy:</label>
-                            <input type="text" id="add-sub-output-file" placeholder="np. film_z_napisami.mp4" value="film_z_napisami.mp4">
+                            <div style="display: flex; gap: 10px;">
+                                <input type="text" id="add-sub-output-file" placeholder="np. film_z_napisami.mp4" value="film_z_napisami.mp4">
+                                <button type="button" class="file-picker-btn" data-target="add-sub-output-file">📁</button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -887,6 +1100,37 @@
             input.addEventListener('change', generateCommand);
         });
 
+        // File picker button handlers
+        document.querySelectorAll('.file-picker-btn').forEach(button => {
+            button.addEventListener('click', async () => {
+                const targetInputId = button.dataset.target;
+                const targetInput = document.getElementById(targetInputId);
+
+                // Create a hidden file input element
+                const fileInput = document.createElement('input');
+                fileInput.type = 'file';
+                fileInput.style.display = 'none'; // Hide the input
+
+                // Listen for file selection
+                fileInput.addEventListener('change', () => {
+                    if (fileInput.files.length > 0) {
+                        const file = fileInput.files[0];
+                        // In a web browser, file.path is not available for security reasons.
+                        // You'll get file.name. For Electron/NW.js, file.path would work.
+                        const filePath = file.name; 
+                        targetInput.value = filePath;
+                        generateCommand(); // Regenerate command after selecting file
+                    }
+                    document.body.removeChild(fileInput); // Clean up the hidden input
+                });
+
+                // Append to body and programmatically click it to open the file dialog
+                document.body.appendChild(fileInput);
+                fileInput.click();
+            });
+        });
+
+
         function generateCommand() {
             let command = '';
             
@@ -1013,6 +1257,36 @@
                 }, 2000);
             });
         }
+
+        // Dark Mode Toggle
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        const body = document.body;
+
+        // Function to set/unset dark mode class
+        function setDarkMode(isDark) {
+            if (isDark) {
+                body.classList.add('dark-mode');
+                darkModeToggle.textContent = '☀️ Tryb Jasny';
+                localStorage.setItem('darkMode', 'enabled');
+            } else {
+                body.classList.remove('dark-mode');
+                darkModeToggle.textContent = '🌙 Tryb Ciemny';
+                localStorage.setItem('darkMode', 'disabled');
+            }
+        }
+
+        // Check user preferences from localStorage or set dark mode by default
+        const savedDarkMode = localStorage.getItem('darkMode');
+        if (savedDarkMode === 'enabled' || savedDarkMode === null) { // Default to dark mode if not set
+            setDarkMode(true);
+        } else {
+            setDarkMode(false);
+        }
+
+        darkModeToggle.addEventListener('click', () => {
+            setDarkMode(!body.classList.contains('dark-mode'));
+        });
+
 
         // Initialize with first operation
         document.querySelector('.operation-card').click();
