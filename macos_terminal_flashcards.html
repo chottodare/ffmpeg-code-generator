@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fiszki - Terminal macOS</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            text-align: center;
+            max-width: 600px;
+            width: 100%;
+        }
+
+        h1 {
+            color: white;
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .flashcard {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            width: 100%;
+            height: 300px;
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+            margin-bottom: 30px;
+        }
+
+        .flashcard.flipped {
+            transform: rotateY(180deg);
+        }
+
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .card-back {
+            transform: rotateY(180deg);
+            background: #f8f9fa;
+        }
+
+        .command {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #2c3e50;
+            background: #ecf0f1;
+            padding: 15px 25px;
+            border-radius: 10px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            border: 2px solid #3498db;
+        }
+
+        .description {
+            font-size: 1.2rem;
+            color: #34495e;
+            text-align: center;
+            line-height: 1.6;
+        }
+
+        .example {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            margin-top: 15px;
+            font-size: 0.9rem;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: #2980b9;
+        }
+
+        .progress {
+            color: white;
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+        }
+
+        .filters {
+            background: rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+        }
+
+        .filter-group label {
+            color: white;
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .checkboxes {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin: 15px 0;
+        }
+
+        .checkboxes label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        .hint {
+            color: rgba(255,255,255,0.8);
+            font-size: 0.9rem;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🖥️ Terminal macOS</h1>
+        
+        <div class="filters">
+            <div class="filter-group">
+                <label>Wybierz kategorie do nauki:</label>
+                <div class="checkboxes">
+                    <label><input type="checkbox" id="basic" checked> Podstawowe komendy</label>
+                    <label><input type="checkbox" id="shortcuts" checked> Skróty klawiszowe</label>
+                    <label><input type="checkbox" id="advanced" checked> Zaawansowane</label>
+                </div>
+                <button onclick="updateFilters()">Zastosuj filtry</button>
+            </div>
+        </div>
+
+        <div class="progress">
+            <span id="current">1</span> / <span id="total">38</span>
+        </div>
+
+        <div class="controls">
+            <button onclick="previousCard()">⬅️ Poprzednia</button>
+            <button onclick="flipCard()">🔄 Przewróć</button>
+            <button onclick="nextCard()">Następna ➡️</button>
+        </div>
+
+        <div class="flashcard" id="flashcard" onclick="flipCard()">
+            <div class="card-front">
+                <div class="command" id="command">cd</div>
+            </div>
+            <div class="card-back">
+                <div class="description" id="description">Zmienia katalog (folder)</div>
+                <div class="example" id="example">cd ~/Desktop</div>
+            </div>
+        </div>
+
+        <div class="hint">💡 Kliknij kartę lub użyj przycisków do nawigacji</div>
+    </div>
+
+    <script>
+        const flashcards = [
+            {
+                command: "cd",
+                description: "Zmienia katalog (folder)",
+                example: "cd ~/Desktop",
+                category: "basic"
+            },
+            {
+                command: "ls",
+                description: "Wyświetla zawartość folderu",
+                example: "ls -la",
+                category: "basic"
+            },
+            {
+                command: "pwd",
+                description: "Pokazuje aktualną ścieżkę",
+                example: "pwd",
+                category: "basic"
+            },
+            {
+                command: "mkdir",
+                description: "Tworzy nowy folder",
+                example: "mkdir moj_folder",
+                category: "basic"
+            },
+            {
+                command: "touch",
+                description: "Tworzy nowy plik",
+                example: "touch plik.txt",
+                category: "basic"
+            },
+            {
+                command: "rm",
+                description: "Usuwa plik",
+                example: "rm plik.txt",
+                category: "basic"
+            },
+            {
+                command: "rmdir",
+                description: "Usuwa pusty folder",
+                example: "rmdir moj_folder",
+                category: "basic"
+            },
+            {
+                command: "cp",
+                description: "Kopiuje plik/folder",
+                example: "cp plik.txt kopia.txt",
+                category: "basic"
+            },
+            {
+                command: "mv",
+                description: "Przenosi/zmienia nazwę",
+                example: "mv stary.txt nowy.txt",
+                category: "basic"
+            },
+            {
+                command: "cat",
+                description: "Wyświetla zawartość pliku",
+                example: "cat plik.txt",
+                category: "basic"
+            },
+            {
+                command: "clear",
+                description: "Czyści ekran terminala",
+                example: "clear",
+                category: "basic"
+            },
+            {
+                command: "open",
+                description: "Otwiera plik/folder w Finder",
+                example: "open .",
+                category: "basic"
+            },
+            {
+                command: "Cmd + A",
+                description: "Zaznacza całą linię",
+                example: "Cmd + A",
+                category: "shortcuts"
+            },
+            {
+                command: "Ctrl + A",
+                description: "Przechodzi na początek linii",
+                example: "Ctrl + A",
+                category: "shortcuts"
+            },
+            {
+                command: "Ctrl + E",
+                description: "Przechodzi na koniec linii",
+                example: "Ctrl + E",
+                category: "shortcuts"
+            },
+            {
+                command: "Ctrl + U",
+                description: "Usuwa całą linię (przed kursorem)",
+                example: "Ctrl + U",
+                category: "shortcuts"
+            },
+            {
+                command: "Ctrl + K",
+                description: "Usuwa od kursora do końca linii",
+                example: "Ctrl + K",
+                category: "shortcuts"
+            },
+            {
+                command: "Ctrl + W",
+                description: "Usuwa ostatnie słowo",
+                example: "Ctrl + W",
+                category: "shortcuts"
+            },
+            {
+                command: "Ctrl + C",
+                description: "Przerywa aktualną komendę",
+                example: "Ctrl + C",
+                category: "shortcuts"
+            },
+            {
+                command: "Cmd + K",
+                description: "Czyści ekran terminala",
+                example: "Cmd + K",
+                category: "shortcuts"
+            },
+            {
+                command: "↑ / ↓",
+                description: "Historia komend",
+                example: "Strzałki góra/dół",
+                category: "shortcuts"
+            },
+            {
+                command: "Tab",
+                description: "Autouzupełnianie",
+                example: "cd Des[Tab] → cd Desktop",
+                category: "shortcuts"
+            },
+            {
+                command: "Ctrl + R",
+                description: "Szuka w historii komend",
+                example: "Ctrl + R, wpisz tekst",
+                category: "shortcuts"
+            },
+            {
+                command: "Cmd + C / V",
+                description: "Kopiuj/Wklej w terminalu",
+                example: "Cmd + C, Cmd + V",
+                category: "shortcuts"
+            },
+            {
+                command: "Option + ←/→",
+                description: "Skacze między słowami",
+                example: "Option + strzałka",
+                category: "shortcuts"
+            },
+            {
+                command: "Ctrl + D",
+                description: "Usuwa znak pod kursorem",
+                example: "Ctrl + D",
+                category: "shortcuts"
+            },
+            {
+                command: "Ctrl + H",
+                description: "Usuwa znak przed kursorem",
+                example: "Ctrl + H (jak Backspace)",
+                category: "shortcuts"
+            },
+            {
+                command: "Ctrl + T",
+                description: "Zamienia miejscami znaki",
+                example: "Ctrl + T",
+                category: "shortcuts"
+            },
+            {
+                command: "Ctrl + Y",
+                description: "Wkleja ostatnio usunięty tekst",
+                example: "Ctrl + Y",
+                category: "shortcuts"
+            },
+            {
+                command: "Cmd + T",
+                description: "Otwiera nową kartę terminala",
+                example: "Cmd + T",
+                category: "shortcuts"
+            },
+            {
+                command: "Cmd + W",
+                description: "Zamyka kartę terminala",
+                example: "Cmd + W",
+                category: "shortcuts"
+            },
+            {
+                command: "Cmd + Shift + →/←",
+                description: "Przełącza między kartami",
+                example: "Cmd + Shift + strzałka",
+                category: "shortcuts"
+            },
+            {
+                command: "history",
+                description: "Pokazuje historię komend",
+                example: "history | grep cd",
+                category: "advanced"
+            },
+            {
+                command: "which",
+                description: "Pokazuje lokalizację programu",
+                example: "which python3",
+                category: "advanced"
+            },
+            {
+                command: "sudo",
+                description: "Uruchamia jako administrator",
+                example: "sudo rm plik.txt",
+                category: "advanced"
+            },
+            {
+                command: "man",
+                description: "Instrukcja obsługi komendy",
+                example: "man ls",
+                category: "advanced"
+            },
+            {
+                command: "grep",
+                description: "Wyszukuje tekst w plikach",
+                example: "grep 'tekst' plik.txt",
+                category: "advanced"
+            },
+            {
+                command: "find",
+                description: "Znajduje pliki i foldery",
+                example: "find . -name '*.txt'",
+                category: "advanced"
+            }
+        ];
+
+        let currentCard = 0;
+        let isFlipped = false;
+        let filteredCards = [...flashcards];
+
+        function updateFilters() {
+            const basic = document.getElementById('basic').checked;
+            const shortcuts = document.getElementById('shortcuts').checked;
+            const advanced = document.getElementById('advanced').checked;
+            
+            filteredCards = flashcards.filter(card => {
+                if (card.category === 'basic' && basic) return true;
+                if (card.category === 'shortcuts' && shortcuts) return true;
+                if (card.category === 'advanced' && advanced) return true;
+                return false;
+            });
+            
+            currentCard = 0;
+            updateCard();
+        }
+
+        function updateCard() {
+            if (filteredCards.length === 0) {
+                document.getElementById('command').textContent = "Brak kart";
+                document.getElementById('description').textContent = "Wybierz co najmniej jedną kategorię";
+                document.getElementById('example').textContent = "";
+                document.getElementById('current').textContent = "0";
+                document.getElementById('total').textContent = "0";
+                return;
+            }
+            
+            const card = filteredCards[currentCard];
+            document.getElementById('command').textContent = card.command;
+            document.getElementById('description').textContent = card.description;
+            document.getElementById('example').textContent = card.example;
+            document.getElementById('current').textContent = currentCard + 1;
+            document.getElementById('total').textContent = filteredCards.length;
+            
+            // Reset flip state
+            const flashcard = document.getElementById('flashcard');
+            flashcard.classList.remove('flipped');
+            isFlipped = false;
+        }
+
+        function flipCard() {
+            const flashcard = document.getElementById('flashcard');
+            flashcard.classList.toggle('flipped');
+            isFlipped = !isFlipped;
+        }
+
+        function nextCard() {
+            if (filteredCards.length === 0) return;
+            currentCard = (currentCard + 1) % filteredCards.length;
+            updateCard();
+        }
+
+        function previousCard() {
+            if (filteredCards.length === 0) return;
+            currentCard = (currentCard - 1 + filteredCards.length) % filteredCards.length;
+            updateCard();
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            switch(e.key) {
+                case 'ArrowRight':
+                case ' ':
+                    e.preventDefault();
+                    if (isFlipped) {
+                        nextCard();
+                    } else {
+                        flipCard();
+                    }
+                    break;
+                case 'ArrowLeft':
+                    e.preventDefault();
+                    previousCard();
+                    break;
+                case 'Enter':
+                    e.preventDefault();
+                    flipCard();
+                    break;
+            }
+        });
+
+        // Initialize
+        updateCard();
+    </script>
+</body>
+</html>

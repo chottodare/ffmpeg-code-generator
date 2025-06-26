@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Uniwersalny Konwerter Video - FFmpeg</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .section-title {
+            font-size: 1.4rem;
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .file-input-area {
+            border: 3px dashed #667eea;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            background: linear-gradient(45deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05));
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .file-input-area:hover {
+            border-color: #764ba2;
+            background: linear-gradient(45deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+            transform: translateY(-2px);
+        }
+
+        .file-input-area.dragover {
+            border-color: #764ba2;
+            background: linear-gradient(45deg, rgba(102, 126, 234, 0.15), rgba(118, 75, 162, 0.15));
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .file-info {
+            margin-top: 15px;
+            padding: 15px;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        label {
+            font-weight: 600;
+            color: #333;
+            font-size: 0.95rem;
+        }
+
+        input, select, textarea {
+            padding: 12px 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 5px;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: auto;
+            margin: 0;
+        }
+
+        .preset-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .preset-btn {
+            padding: 10px 20px;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .preset-btn:hover, .preset-btn.active {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .command-output {
+            background: #1a1a1a;
+            color: #00ff00;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-break: break-all;
+            margin-top: 20px;
+            border: 1px solid #333;
+        }
+
+        .generate-btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: block;
+            margin: 20px auto;
+            min-width: 200px;
+        }
+
+        .generate-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .copy-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            margin-top: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .copy-btn:hover {
+            background: #218838;
+            transform: translateY(-1px);
+        }
+
+        .help-text {
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 5px;
+            font-style: italic;
+        }
+
+        .advanced-section {
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+            margin-top: 20px;
+        }
+
+        .toggle-advanced {
+            background: none;
+            border: 1px solid #667eea;
+            color: #667eea;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-advanced:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .icon {
+            font-size: 1.2rem;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎬 Uniwersalny Konwerter Video</h1>
+        
+        <!-- Sekcja wyboru pliku -->
+        <div class="section">
+            <h2 class="section-title">
+                <span class="icon">📁</span>
+                Wybierz plik video
+            </h2>
+            <div class="file-input-area" onclick="document.getElementById('videoFile').click()">
+                <div style="font-size: 3rem; margin-bottom: 10px;">🎥</div>
+                <p style="font-size: 1.2rem; margin-bottom: 5px;">Kliknij lub przeciągnij plik tutaj</p>
+                <p style="color: #666;">Obsługiwane formaty: MP4, AVI, MOV, MKV, WMV, FLV, WebM</p>
+                <input type="file" id="videoFile" class="file-input" accept="video/*">
+            </div>
+            <div id="fileInfo" class="file-info" style="display: none;"></div>
+        </div>
+
+        <!-- Presety -->
+        <div class="section">
+            <h2 class="section-title">
+                <span class="icon">⚡</span>
+                Szybkie presety
+            </h2>
+            <div class="preset-buttons">
+                <button class="preset-btn" onclick="applyPreset('fullhd')">Full HD (1080p)</button>
+                <button class="preset-btn" onclick="applyPreset('hd')">HD (720p)</button>
+                <button class="preset-btn" onclick="applyPreset('compress')">Kompresja (małe pliki)</button>
+                <button class="preset-btn" onclick="applyPreset('mobile')">Mobile (480p)</button>
+                <button class="preset-btn" onclick="applyPreset('web')">Web Optimized</button>
+                <button class="preset-btn" onclick="clearSettings()">Wyczyść</button>
+            </div>
+        </div>
+
+        <!-- Podstawowe ustawienia -->
+        <div class="section">
+            <h2 class="section-title">
+                <span class="icon">⚙️</span>
+                Ustawienia konwersji
+            </h2>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="outputFormat">Format wyjściowy:</label>
+                    <select id="outputFormat">
+                        <option value="mp4">MP4 (H.264)</option>
+                        <option value="webm">WebM (VP9)</option>
+                        <option value="avi">AVI</option>
+                        <option value="mov">MOV</option>
+                        <option value="mkv">MKV</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="resolution">Rozdzielczość:</label>
+                    <select id="resolution">
+                        <option value="">Nie zmieniaj</option>
+                        <option value="1920:1080">Full HD (1920x1080)</option>
+                        <option value="1280:720">HD (1280x720)</option>
+                        <option value="854:480">SD (854x480)</option>
+                        <option value="640:360">360p</option>
+                        <option value="custom">Niestandardowa</option>
+                    </select>
+                </div>
+
+                <div class="form-group" id="customResGroup" style="display: none;">
+                    <label for="customWidth">Szerokość x Wysokość:</label>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="number" id="customWidth" placeholder="1920">
+                        <span style="align-self: center;">x</span>
+                        <input type="number" id="customHeight" placeholder="1080">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="videoBitrate">Video Bitrate:</label>
+                    <input type="text" id="videoBitrate" placeholder="np. 2000k, 5M">
+                    <span class="help-text">k = kbit/s, M = Mbit/s</span>
+                </div>
+
+                <div class="form-group">
+                    <label for="audioCodec">Kodek audio:</label>
+                    <select id="audioCodec">
+                        <option value="copy">Kopiuj bez zmian</option>
+                        <option value="aac">AAC</option>
+                        <option value="mp3">MP3</option>
+                        <option value="opus">Opus</option>
+                        <option value="none">Usuń audio</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="audioBitrate">Audio Bitrate:</label>
+                    <input type="text" id="audioBitrate" placeholder="np. 128k, 320k">
+                    <span class="help-text">Tylko gdy kodek audio != kopiuj</span>
+                </div>
+            </div>
+
+            <button class="toggle-advanced" onclick="toggleAdvanced()">Pokaż zaawansowane opcje</button>
+            
+            <div id="advancedOptions" class="advanced-section" style="display: none;">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="videoCodec">Kodek video:</label>
+                        <select id="videoCodec">
+                            <option value="libx264">H.264 (libx264)</option>
+                            <option value="libx265">H.265 (libx265)</option>
+                            <option value="libvpx-vp9">VP9</option>
+                            <option value="copy">Kopiuj bez zmian</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="crf">CRF (jakość):</label>
+                        <input type="range" id="crf" min="18" max="28" value="23">
+                        <span id="crfValue">23 (domyślny)</span>
+                        <span class="help-text">18 = najwyższa jakość, 28 = najniższa</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="preset">Preset szybkości:</label>
+                        <select id="preset">
+                            <option value="medium">Medium (domyślny)</option>
+                            <option value="ultrafast">Ultra Fast</option>
+                            <option value="superfast">Super Fast</option>
+                            <option value="veryfast">Very Fast</option>
+                            <option value="faster">Faster</option>
+                            <option value="fast">Fast</option>
+                            <option value="slow">Slow</option>
+                            <option value="slower">Slower</option>
+                            <option value="veryslow">Very Slow</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="frameRate">Klatki na sekundę:</label>
+                        <select id="frameRate">
+                            <option value="">Nie zmieniaj</option>
+                            <option value="24">24 fps</option>
+                            <option value="25">25 fps</option>
+                            <option value="30">30 fps</option>
+                            <option value="60">60 fps</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="startTime">Czas początkowy:</label>
+                        <input type="text" id="startTime" placeholder="00:01:30 lub 90">
+                        <span class="help-text">Format: HH:MM:SS lub sekundy</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="duration">Czas trwania:</label>
+                        <input type="text" id="duration" placeholder="00:05:00 lub 300">
+                        <span class="help-text">Format: HH:MM:SS lub sekundy</span>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="twoPass">
+                            <label for="twoPass">Kodowanie dwuprzebiegowe (lepsza jakość)</label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="maintainAspect">
+                            <label for="maintainAspect">Zachowaj proporcje obrazu</label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="customParams">Dodatkowe parametry ffmpeg:</label>
+                        <textarea id="customParams" rows="3" placeholder="-filter:v unsharp=5:5:1.0 -threads 4"></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Generowanie polecenia -->
+        <div class="section">
+            <h2 class="section-title">
+                <span class="icon">🚀</span>
+                Polecenie FFmpeg
+            </h2>
+            <button class="generate-btn" onclick="generateCommand()">Generuj polecenie FFmpeg</button>
+            <div id="commandOutput" class="command-output" style="display: none;"></div>
+            <button id="copyBtn" class="copy-btn" style="display: none;" onclick="copyCommand()">📋 Kopiuj polecenie</button>
+        </div>
+    </div>
+
+    <script>
+        let selectedFile = null;
+        let generatedCommand = '';
+        let selectedOS = '';
+
+        // Auto-detect OS
+        function detectOS() {
+            const platform = navigator.platform.toLowerCase();
+            const userAgent = navigator.userAgent.toLowerCase();
+            
+            if (platform.includes('mac') || userAgent.includes('mac')) {
+                selectOS('macos');
+            } else if (platform.includes('win') || userAgent.includes('windows')) {
+                selectOS('windows');
+            } else {
+                selectOS('linux');
+            }
+        }
+
+        // Wybór systemu operacyjnego
+        function selectOS(os) {
+            selectedOS = os;
+            
+            // Usuń aktywny OS
+            document.querySelectorAll('#macosBtn, #windowsBtn, #linuxBtn').forEach(btn => btn.classList.remove('active'));
+            
+            // Zaznacz wybrany OS
+            document.getElementById(os + 'Btn').classList.add('active');
+            
+            // Pokaż informacje o OS
+            const osInfo = document.getElementById('osInfo');
+            const osSpecificInfo = document.getElementById('osSpecificInfo');
+            
+            let info = '';
+            switch(os) {
+                case 'macos':
+                    info = `
+                        <strong>💡 Wskazówki dla macOS:</strong><br>
+                        • Spacje w nazwach plików będą automatycznie escape'owane (backslash)<br>
+                        • Można przeciągnąć plik do Terminala żeby uzyskać pełną ścieżkę<br>
+                        • Null device: <code>/dev/null</code><br>
+                        • Zalecany Terminal: Terminal.app lub iTerm2
+                    `;
+                    break;
+                case 'windows':
+                    info = `
+                        <strong>💡 Wskazówki dla Windows:</strong><br>
+                        • Spacje w nazwach plików będą escape'owane backslash'em<br>
+                        • Używaj Command Prompt (cmd) lub PowerShell<br>
+                        • Null device: <code>NUL</code><br>
+                        • Ścieżki używają backslash (\\) - będą automatycznie dostosowane
+                    `;
+                    break;
+                case 'linux':
+                    info = `
+                        <strong>💡 Wskazówki dla Linux:</strong><br>
+                        • Spacje w nazwach plików będą escape'owane backslash'em<br>
+                        • Null device: <code>/dev/null</code><br>
+                        • Używaj bash, zsh lub innego terminala<br>
+                        • Można użyć tab completion dla nazw plików
+                    `;
+                    break;
+            }
+            
+            osSpecificInfo.innerHTML = info;
+            osInfo.style.display = 'block';
+        }
+
+        // Obsługa wyboru pliku
+        document.getElementById('videoFile').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                selectedFile = file;
+                showFileInfo(file);
+            }
+        });
+
+        // Drag & Drop
+        const fileInputArea = document.querySelector('.file-input-area');
+        
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            fileInputArea.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            fileInputArea.addEventListener(eventName, highlight, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            fileInputArea.addEventListener(eventName, unhighlight, false);
+        });
+
+        function highlight(e) {
+            fileInputArea.classList.add('dragover');
+        }
+
+        function unhighlight(e) {
+            fileInputArea.classList.remove('dragover');
+        }
+
+        fileInputArea.addEventListener('drop', handleDrop, false);
+
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            
+            if (files.length > 0) {
+                selectedFile = files[0];
+                showFileInfo(files[0]);
+            }
+        }
+
+        function showFileInfo(file) {
+            const fileInfo = document.getElementById('fileInfo');
+            const fileSize = (file.size / (1024 * 1024)).toFixed(2);
+            
+            fileInfo.innerHTML = `
+                <strong>📄 Wybrany plik:</strong> ${file.name}<br>
+                <strong>📊 Rozmiar:</strong> ${fileSize} MB<br>
+                <strong>📝 Typ:</strong> ${file.type}
+            `;
+            fileInfo.style.display = 'block';
+        }
+
+        // Presety
+        function applyPreset(preset) {
+            // Usuń aktywny preset
+            document.querySelectorAll('.preset-btn').forEach(btn => btn.classList.remove('active'));
+            
+            // Znajdź i zaznacz aktywny przycisk
+            event.target.classList.add('active');
+            
+            switch(preset) {
+                case 'fullhd':
+                    document.getElementById('resolution').value = '1920:1080';
+                    document.getElementById('videoBitrate').value = '5000k';
+                    document.getElementById('audioCodec').value = 'copy';
+                    document.getElementById('maintainAspect').checked = true;
+                    break;
+                case 'hd':
+                    document.getElementById('resolution').value = '1280:720';
+                    document.getElementById('videoBitrate').value = '3000k';
+                    document.getElementById('audioCodec').value = 'copy';
+                    document.getElementById('maintainAspect').checked = true;
+                    break;
+                case 'compress':
+                    document.getElementById('resolution').value = '1280:720';
+                    document.getElementById('videoBitrate').value = '1500k';
+                    document.getElementById('audioCodec').value = 'aac';
+                    document.getElementById('audioBitrate').value = '128k';
+                    document.getElementById('crf').value = '26';
+                    updateCrfValue();
+                    break;
+                case 'mobile':
+                    document.getElementById('resolution').value = '854:480';
+                    document.getElementById('videoBitrate').value = '1000k';
+                    document.getElementById('audioCodec').value = 'aac';
+                    document.getElementById('audioBitrate').value = '96k';
+                    document.getElementById('frameRate').value = '30';
+                    break;
+                case 'web':
+                    document.getElementById('outputFormat').value = 'mp4';
+                    document.getElementById('resolution').value = '1280:720';
+                    document.getElementById('videoBitrate').value = '2500k';
+                    document.getElementById('audioCodec').value = 'aac';
+                    document.getElementById('audioBitrate').value = '128k';
+                    document.getElementById('preset').value = 'fast';
+                    break;
+            }
+        }
+
+        function clearSettings() {
+            document.querySelectorAll('.preset-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById('outputFormat').value = 'mp4';
+            document.getElementById('resolution').value = '';
+            document.getElementById('videoBitrate').value = '';
+            document.getElementById('audioCodec').value = 'copy';
+            document.getElementById('audioBitrate').value = '';
+            document.getElementById('videoCodec').value = 'libx264';
+            document.getElementById('crf').value = '23';
+            document.getElementById('preset').value = 'medium';
+            document.getElementById('frameRate').value = '';
+            document.getElementById('startTime').value = '';
+            document.getElementById('duration').value = '';
+            document.getElementById('customParams').value = '';
+            document.getElementById('twoPass').checked = false;
+            document.getElementById('maintainAspect').checked = false;
+            updateCrfValue();
+        }
+
+        // Obsługa niestandardowej rozdzielczości
+        document.getElementById('resolution').addEventListener('change', function() {
+            const customGroup = document.getElementById('customResGroup');
+            if (this.value === 'custom') {
+                customGroup.style.display = 'block';
+            } else {
+                customGroup.style.display = 'none';
+            }
+        });
+
+        // Obsługa CRF slider
+        document.getElementById('crf').addEventListener('input', updateCrfValue);
+
+        function updateCrfValue() {
+            const crf = document.getElementById('crf').value;
+            const crfValue = document.getElementById('crfValue');
+            let quality = '';
+            if (crf <= 20) quality = ' (bardzo wysoka jakość)';
+            else if (crf <= 23) quality = ' (wysoka jakość)';
+            else if (crf <= 26) quality = ' (średnia jakość)';
+            else quality = ' (niska jakość)';
+            
+            crfValue.textContent = crf + quality;
+        }
+
+        function toggleAdvanced() {
+            const advanced = document.getElementById('advancedOptions');
+            const btn = document.querySelector('.toggle-advanced');
+            
+            if (advanced.style.display === 'none') {
+                advanced.style.display = 'block';
+                btn.textContent = 'Ukryj zaawansowane opcje';
+            } else {
+                advanced.style.display = 'none';
+                btn.textContent = 'Pokaż zaawansowane opcje';
+            }
+        }
+
+        function generateCommand() {
+            if (!selectedFile) {
+                alert('Najpierw wybierz plik video!');
+                return;
+            }
+
+            if (!selectedOS) {
+                alert('Najpierw wybierz system operacyjny!');
+                return;
+            }
+
+            // Przygotuj nazwę pliku zgodnie z OS
+            let inputFileName = selectedFile.name;
+            let nullDevice = '/dev/null';
+            
+            if (selectedOS === 'windows') {
+                nullDevice = 'NUL';
+                // Windows - bez cudzysłowów, używamy escape
+                inputFileName = inputFileName.replace(/ /g, '\\ ');
+            } else {
+                // macOS/Linux - escape spacji zamiast cudzysłowów
+                inputFileName = inputFileName.replace(/ /g, '\\ ');
+                inputFileName = inputFileName.replace(/&/g, '\\&');
+                inputFileName = inputFileName.replace(/\(/g, '\\(');
+                inputFileName = inputFileName.replace(/\)/g, '\\)');
+            }
+
+            let command = 'ffmpeg -i ' + inputFileName;
+            
+            // Czas początkowy
+            const startTime = document.getElementById('startTime').value;
+            if (startTime) {
+                command = 'ffmpeg -ss ' + startTime + ' -i ' + inputFileName;
+            }
+
+            // Czas trwania
+            const duration = document.getElementById('duration').value;
+            if (duration) {
+                command += ' -t ' + duration;
+            }
+
+            // Kodek video
+            const videoCodec = document.getElementById('videoCodec').value;
+            if (videoCodec !== 'copy') {
+                command += ' -c:v ' + videoCodec;
+            } else {
+                command += ' -c:v copy';
+            }
+
+            // Rozdzielczość
+            const resolution = document.getElementById('resolution').value;
+            const maintainAspect = document.getElementById('maintainAspect').checked;
+            
+            if (resolution === 'custom') {
+                const width = document.getElementById('customWidth').value;
+                const height = document.getElementById('customHeight').value;
+                if (width && height) {
+                    if (maintainAspect) {
+                        command += ` -vf "scale=${width}:${height}:force_original_aspect_ratio=decrease,pad=${width}:${height}:(ow-iw)/2:(oh-ih)/2"`;
+                    } else {
+                        command += ` -vf "scale=${width}:${height}"`;
+                    }
+                }
+            } else if (resolution) {
+                if (maintainAspect) {
+                    const [w, h] = resolution.split(':');
+                    command += ` -vf "scale=${w}:${h}:force_original_aspect_ratio=decrease,pad=${w}:${h}:(ow-iw)/2:(oh-ih)/2"`;
+                } else {
+                    command += ` -vf "scale=${resolution}"`;
+                }
+            }
+
+            // Video bitrate
+            const videoBitrate = document.getElementById('videoBitrate').value;
+            if (videoBitrate && videoCodec !== 'copy') {
+                command += ' -b:v ' + videoBitrate;
+            }
+
+            // CRF (tylko gdy nie ma bitrate)
+            if (!videoBitrate && videoCodec !== 'copy') {
+                const crf = document.getElementById('crf').value;
+                command += ' -crf ' + crf;
+            }
+
+            // Preset
+            const preset = document.getElementById('preset').value;
+            if (videoCodec === 'libx264' || videoCodec === 'libx265') {
+                command += ' -preset ' + preset;
+            }
+
+            // Frame rate
+            const frameRate = document.getElementById('frameRate').value;
+            if (frameRate) {
+                command += ' -r ' + frameRate;
+            }
+
+            // Audio codec
+            const audioCodec = document.getElementById('audioCodec').value;
+            if (audioCodec === 'none') {
+                command += ' -an';
+            } else if (audioCodec === 'copy') {
+                command += ' -c:a copy';
+            } else {
+                command += ' -c:a ' + audioCodec;
+                
+                // Audio bitrate
+                const audioBitrate = document.getElementById('audioBitrate').value;
+                if (audioBitrate) {
+                    command += ' -b:a ' + audioBitrate;
+                }
+            }
+
+            // Dodatkowe parametry
+            const customParams = document.getElementById('customParams').value;
+            if (customParams) {
+                command += ' ' + customParams;
+            }
+
+            // Nazwa pliku wyjściowego
+            const outputFormat = document.getElementById('outputFormat').value;
+            const inputName = selectedFile.name.replace(/\.[^/.]+$/, "");
+            let outputFileName = inputName + '_converted.' + outputFormat;
+            
+            // Dostosuj nazwę wyjściową do OS - bez cudzysłowów
+            if (selectedOS === 'windows') {
+                outputFileName = outputFileName.replace(/ /g, '\\ ');
+            } else {
+                outputFileName = outputFileName.replace(/ /g, '\\ ');
+                outputFileName = outputFileName.replace(/&/g, '\\&');
+                outputFileName = outputFileName.replace(/\(/g, '\\(');
+                outputFileName = outputFileName.replace(/\)/g, '\\)');
+            }
+            
+            command += ' ' + outputFileName;
+
+            // Two-pass encoding
+            const twoPass = document.getElementById('twoPass').checked;
+            if (twoPass && videoCodec !== 'copy') {
+                const baseCommand = command;
+                if (selectedOS === 'windows') {
+                    command = `REM Pierwszy przebieg:\n${baseCommand} -pass 1 -f null ${nullDevice}\nREM Drugi przebieg:\n${baseCommand} -pass 2`;
+                } else {
+                    command = `# Pierwszy przebieg:\n${baseCommand} -pass 1 -f null ${nullDevice} && \\\n# Drugi przebieg:\n${baseCommand} -pass 2`;
+                }
+            }
+
+            generatedCommand = command;
+            
+            const output = document.getElementById('commandOutput');
+            output.textContent = command;
+            output.style.display = 'block';
+            
+            document.getElementById('copyBtn').style.display = 'inline-block';
+            
+            // Pokaż instrukcje instalacji FFmpeg
+            showInstallInstructions();
+        }
+
+        function copyCommand() {
+            navigator.clipboard.writeText(generatedCommand).then(() => {
+                const btn = document.getElementById('copyBtn');
+                const originalText = btn.textContent;
+                btn.textContent = '✅ Skopiowano!';
+                btn.style.background = '#28a745';
+                
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.style.background = '#28a745';
+                }, 2000);
+            });
+        }
+
+        function showInstallInstructions() {
+            const installInfo = document.getElementById('installInfo');
+            const installInstructions = document.getElementById('installInstructions');
+            
+            let instructions = '';
+            switch(selectedOS) {
+                case 'macos':
+                    instructions = `
+                        <strong>📦 Instalacja FFmpeg na macOS:</strong><br><br>
+                        <strong>Opcja 1: Homebrew (zalecane)</strong><br>
+                        <code>brew install ffmpeg</code><br><br>
+                        <strong>Opcja 2: MacPorts</strong><br>
+                        <code>sudo port install ffmpeg</code><br><br>
+                        <strong>Opcja 3: Pobierz bezpośrednio</strong><br>
+                        Odwiedź: <a href="https://ffmpeg.org/download.html" target="_blank">ffmpeg.org/download.html</a>
+                    `;
+                    break;
+                case 'windows':
+                    instructions = `
+                        <strong>📦 Instalacja FFmpeg na Windows:</strong><br><br>
+                        <strong>Opcja 1: Chocolatey</strong><br>
+                        <code>choco install ffmpeg</code><br><br>
+                        <strong>Opcja 2: Winget</strong><br>
+                        <code>winget install ffmpeg</code><br><br>
+                        <strong>Opcja 3: Pobierz bezpośrednio</strong><br>
+                        1. Pobierz z <a href="https://ffmpeg.org/download.html" target="_blank">ffmpeg.org</a><br>
+                        2. Rozpakuj do folderu (np. C:\\ffmpeg)<br>
+                        3. Dodaj ścieżkę do PATH w zmiennych środowiskowych
+                    `;
+                    break;
+                case 'linux':
+                    instructions = `
+                        <strong>📦 Instalacja FFmpeg na Linux:</strong><br><br>
+                        <strong>Ubuntu/Debian:</strong><br>
+                        <code>sudo apt update && sudo apt install ffmpeg</code><br><br>
+                        <strong>CentOS/RHEL/Fedora:</strong><br>
+                        <code>sudo dnf install ffmpeg</code> lub <code>sudo yum install ffmpeg</code><br><br>
+                        <strong>Arch Linux:</strong><br>
+                        <code>sudo pacman -S ffmpeg</code>
+                    `;
+                    break;
+            }
+            
+            installInstructions.innerHTML = instructions;
+            installInfo.style.display = 'block';
+        }
+
+        // Inicjalizacja
+        updateCrfValue();
+        detectOS(); // Auto-detect OS przy ładowaniu strony
+    </script>
+</body>
+</html>
