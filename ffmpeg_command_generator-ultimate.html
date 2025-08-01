@@ -18,6 +18,30 @@
             padding: 20px;
         }
 
+        .mode-selector {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .mode-btn {
+            padding: 12px 24px;
+            border: 2px solid #e2e8f0;
+            background: white;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #4a5568;
+        }
+
+        .mode-btn:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+        }
+
         .container {
             max-width: 900px;
             margin: 0 auto;
@@ -308,7 +332,226 @@
     <div class="container">
         <h1>🎬 Generator komend FFmpeg</h1>
         
+        <div class="mode-selector">
+            <button type="button" class="mode-btn active" onclick="switchMode('convert')">
+                🔄 Konwersja
+            </button>
+            <button type="button" class="mode-btn" onclick="switchMode('analyze')">
+                🔍 Analiza napisów
+            </button>
+        </div>
+        
         <form id="ffmpegForm">
+            <div class="form-group">
+                <label for="inputTemplate">Szablon nazwy pliku wejściowego:</label>
+                <input type="text" id="inputTemplate" placeholder='np. "[Judas] Dr. Stone - S01E{}.mkv"' value="[Judas] Dr. Stone - S01E{}.mkv">
+            </div>
+
+            <div class="form-group">
+                <label for="outputTemplate">Szablon nazwy pliku wyjściowego:</label>
+                <input type="text" id="outputTemplate" placeholder='np. "s01e{}_clear_audio.mp3"' value="s01e{}_clear_audio.mp3">
+            </div>
+
+            <div class="form-group">
+                <label for="startEpisode">Pierwszy odcinek:</label>
+                <input type="number" id="startEpisode" min="1" value="1">
+            </div>
+
+            <div class="form-group">
+                <label for="endEpisode">Ostatni odcinek:</label>
+                <input type="number" id="endEpisode" min="1" value="20">
+            </div>
+
+            <div class="form-group">
+                <label for="conversionType">Typ konwersji:</label>
+                <div class="radio-group">
+                    <div class="radio-option">
+                        <input type="radio" id="audioOnly" name="conversionType" value="audio" checked>
+                        <label for="audioOnly">Tylko audio (MP3)</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" id="videoConvert" name="conversionType" value="video">
+                        <label for="videoConvert">Konwersja video</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" id="custom" name="conversionType" value="custom">
+                        <label for="custom">Własne parametry</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group hidden" id="customParams">
+                <label for="ffmpegParams">Parametry FFmpeg:</label>
+                <input type="text" id="ffmpegParams" placeholder='Kliknij opcje poniżej lub wpisz własne' readonly>
+                
+                <div class="params-grid">
+                    <div class="param-category">
+                        <h4>🎥 Video Kodeki</h4>
+                        <div class="param-option" data-param="-c:v libx264" data-desc="Kodek H.264 (najbardziej kompatybilny)">
+                            <span class="param-name">H.264</span>
+                            <span class="param-desc">Kodek H.264 (najbardziej kompatybilny)</span>
+                        </div>
+                        <div class="param-option" data-param="-c:v libx265" data-desc="Kodek H.265/HEVC (lepsza kompresja)">
+                            <span class="param-name">H.265</span>
+                            <span class="param-desc">Kodek H.265/HEVC (lepsza kompresja)</span>
+                        </div>
+                        <div class="param-option" data-param="-vn" data-desc="Usuwa strumień video">
+                            <span class="param-name">Bez video</span>
+                            <span class="param-desc">Usuwa strumień video</span>
+                        </div>
+                    </div>
+
+                    <div class="param-category">
+                        <h4>🔊 Audio Kodeki</h4>
+                        <div class="param-option" data-param="-c:a aac" data-desc="Kodek AAC (dobra jakość i kompatybilność)">
+                            <span class="param-name">AAC</span>
+                            <span class="param-desc">Kodek AAC (dobra jakość i kompatybilność)</span>
+                        </div>
+                        <div class="param-option" data-param="-c:a mp3" data-desc="Kodek MP3 (uniwersalny)">
+                            <span class="param-name">MP3</span>
+                            <span class="param-desc">Kodek MP3 (uniwersalny)</span>
+                        </div>
+                        <div class="param-option" data-param="-c:a libopus" data-desc="Kodek Opus (najlepsza jakość/rozmiar)">
+                            <span class="param-name">Opus</span>
+                            <span class="param-desc">Kodek Opus (najlepsza jakość/rozmiar)</span>
+                        </div>
+                        <div class="param-option" data-param="-an" data-desc="Usuwa strumień audio">
+                            <span class="param-name">Bez audio</span>
+                            <span class="param-desc">Usuwa strumień audio</span>
+                        </div>
+                    </div>
+
+                    <div class="param-category">
+                        <h4>📊 Jakość Video</h4>
+                        <div class="param-option" data-param="-crf 18" data-desc="Bardzo wysoka jakość (duży plik)">
+                            <span class="param-name">CRF 18</span>
+                            <span class="param-desc">Bardzo wysoka jakość (duży plik)</span>
+                        </div>
+                        <div class="param-option" data-param="-crf 23" data-desc="Dobra jakość (zalecane)">
+                            <span class="param-name">CRF 23</span>
+                            <span class="param-desc">Dobra jakość (zalecane)</span>
+                        </div>
+                        <div class="param-option" data-param="-crf 28" data-desc="Średnia jakość (mały plik)">
+                            <span class="param-name">CRF 28</span>
+                            <span class="param-desc">Średnia jakość (mały plik)</span>
+                        </div>
+                        <div class="param-option" data-param="-b:v 2M" data-desc="Bitrate video 2 Mbps">
+                            <span class="param-name">2M bitrate</span>
+                            <span class="param-desc">Bitrate video 2 Mbps</span>
+                        </div>
+                    </div>
+
+                    <div class="param-category">
+                        <h4>🎵 Jakość Audio</h4>
+                        <div class="param-option" data-param="-b:a 320k" data-desc="Bitrate audio 320 kbps (najwyższa jakość)">
+                            <span class="param-name">320k</span>
+                            <span class="param-desc">Bitrate audio 320 kbps (najwyższa jakość)</span>
+                        </div>
+                        <div class="param-option" data-param="-b:a 192k" data-desc="Bitrate audio 192 kbps (dobra jakość)">
+                            <span class="param-name">192k</span>
+                            <span class="param-desc">Bitrate audio 192 kbps (dobra jakość)</span>
+                        </div>
+                        <div class="param-option" data-param="-b:a 128k" data-desc="Bitrate audio 128 kbps (standardowa jakość)">
+                            <span class="param-name">128k</span>
+                            <span class="param-desc">Bitrate audio 128 kbps (standardowa jakość)</span>
+                        </div>
+                        <div class="param-option" data-param="-b:a 96k" data-desc="Bitrate audio 96 kbps (niska jakość, mały plik)">
+                            <span class="param-name">96k</span>
+                            <span class="param-desc">Bitrate audio 96 kbps (niska jakość, mały plik)</span>
+                        </div>
+                    </div>
+
+                    <div class="param-category">
+                        <h4>📐 Rozdzielczość</h4>
+                        <div class="param-option" data-param="-s 1920x1080" data-desc="Full HD 1080p">
+                            <span class="param-name">1080p</span>
+                            <span class="param-desc">Full HD 1920x1080</span>
+                        </div>
+                        <div class="param-option" data-param="-s 1280x720" data-desc="HD 720p">
+                            <span class="param-name">720p</span>
+                            <span class="param-desc">HD 1280x720</span>
+                        </div>
+                        <div class="param-option" data-param="-s 854x480" data-desc="SD 480p">
+                            <span class="param-name">480p</span>
+                            <span class="param-desc">SD 854x480</span>
+                        </div>
+                        <div class="param-option" data-param="-vf scale=-1:720" data-desc="Skaluj do wysokości 720px (zachowaj proporcje)">
+                            <span class="param-name">Scale 720</span>
+                            <span class="param-desc">Skaluj do wysokości 720px</span>
+                        </div>
+                    </div>
+
+                    <div class="param-category">
+                        <h4>⚡ Szybkość/Preset</h4>
+                        <div class="param-option" data-param="-preset ultrafast" data-desc="Najszybsza konwersja (gorsze kompresja)">
+                            <span class="param-name">Ultrafast</span>
+                            <span class="param-desc">Najszybsza konwersja</span>
+                        </div>
+                        <div class="param-option" data-param="-preset fast" data-desc="Szybka konwersja (dobra kompresja)">
+                            <span class="param-name">Fast</span>
+                            <span class="param-desc">Szybka konwersja</span>
+                        </div>
+                        <div class="param-option" data-param="-preset medium" data-desc="Średnia szybkość (zalecane)">
+                            <span class="param-name">Medium</span>
+                            <span class="param-desc">Średnia szybkość (zalecane)</span>
+                        </div>
+                        <div class="param-option" data-param="-preset slow" data-desc="Wolna konwersja (najlepsza kompresja)">
+                            <span class="param-name">Slow</span>
+                            <span class="param-desc">Wolna konwersja (najlepsza kompresja)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="params-controls">
+                    <button type="button" class="clear-params-btn" onclick="clearCustomParams()">🗑️ Wyczyść</button>
+                    <button type="button" class="edit-params-btn" onclick="enableParamsEdit()">✏️ Edytuj ręcznie</button>
+                </div>
+            </div>
+
+            <button type="button" class="generate-btn" onclick="generateCommand()">
+                🚀 Generuj komendę
+            </button>
+        </form>
+
+        <!-- Sekcja analizy napisów -->
+        <form id="analyzeForm" class="hidden">
+            <div class="form-group">
+                <label for="analyzeInputTemplate">Szablon nazwy pliku do analizy:</label>
+                <input type="text" id="analyzeInputTemplate" placeholder='np. "[Judas] Dr. Stone - S01E{}.mkv"' value="[Judas] Dr. Stone - S01E{}.mkv">
+            </div>
+
+            <div class="form-group">
+                <label for="analyzeStartEpisode">Pierwszy odcinek:</label>
+                <input type="number" id="analyzeStartEpisode" min="1" value="1">
+            </div>
+
+            <div class="form-group">
+                <label for="analyzeEndEpisode">Ostatni odcinek:</label>
+                <input type="number" id="analyzeEndEpisode" min="1" value="3">
+            </div>
+
+            <div class="form-group">
+                <label for="analyzeType">Typ analizy:</label>
+                <div class="radio-group">
+                    <div class="radio-option">
+                        <input type="radio" id="basicInfo" name="analyzeType" value="basic" checked>
+                        <label for="basicInfo">Podstawowe info (szybkie)</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" id="detailedInfo" name="analyzeType" value="detailed">
+                        <label for="detailedInfo">Szczegółowe info napisów</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" id="streamCount" name="analyzeType" value="count">
+                        <label for="streamCount">Tylko liczba ścieżek</label>
+                    </div>
+                </div>
+            </div>
+
+            <button type="button" class="generate-btn" onclick="generateAnalyzeCommand()">
+                🔍 Generuj komendę analizy
+            </button>
+        </form>
             <div class="form-group">
                 <label for="inputTemplate">Szablon nazwy pliku wejściowego:</label>
                 <input type="text" id="inputTemplate" placeholder='np. "[Judas] Dr. Stone - S01E{}.mkv"' value="[Judas] Dr. Stone - S01E{}.mkv">
@@ -510,6 +753,83 @@
 
         let selectedParams = [];
         let isManualEdit = false;
+        let currentMode = 'convert';
+
+        function switchMode(mode) {
+            currentMode = mode;
+            
+            // Aktualizuj przyciski
+            document.querySelectorAll('.mode-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Pokaż/ukryj odpowiednie formularze
+            if (mode === 'convert') {
+                document.getElementById('ffmpegForm').classList.remove('hidden');
+                document.getElementById('analyzeForm').classList.add('hidden');
+            } else {
+                document.getElementById('ffmpegForm').classList.add('hidden');
+                document.getElementById('analyzeForm').classList.remove('hidden');
+            }
+            
+            // Ukryj sekcję wyników
+            document.getElementById('outputSection').classList.add('hidden');
+        }
+
+        function generateAnalyzeCommand() {
+            const inputTemplate = document.getElementById('analyzeInputTemplate').value;
+            const startEpisode = parseInt(document.getElementById('analyzeStartEpisode').value);
+            const endEpisode = parseInt(document.getElementById('analyzeEndEpisode').value);
+            const analyzeType = document.querySelector('input[name="analyzeType"]:checked').value;
+
+            let command = '';
+            let explanation = [];
+
+            switch(analyzeType) {
+                case 'basic':
+                    command = `for i in {${startEpisode.toString().padStart(2, '0')}..${endEpisode.toString().padStart(2, '0')}}; do echo "=== Odcinek \${i} ==="; ffmpeg -i "${inputTemplate.replace('{}', '${i}')}" 2>&1 | grep -E "(Stream|Duration)"; done`;
+                    explanation = [
+                        'Pokazuje podstawowe informacje o każdym pliku',
+                        'Wyświetla wszystkie strumienie (video, audio, napisy)',
+                        'Pokazuje czas trwania i kodeki',
+                        'Szybka analiza bez szczegółów'
+                    ];
+                    break;
+                case 'detailed':
+                    command = `for i in {${startEpisode.toString().padStart(2, '0')}..${endEpisode.toString().padStart(2, '0')}}; do echo "=== Napisy w odcinku \${i} ==="; ffprobe -v error -select_streams s -show_entries stream=index,codec_name:stream_tags=language,title -of table "${inputTemplate.replace('{}', '${i}')}"; done`;
+                    explanation = [
+                        'Szczegółowa analiza tylko strumieni napisów',
+                        'Pokazuje indeks każdej ścieżki napisów',
+                        'Wyświetla kodek napisów (ass, srt, pgs itp.)',
+                        'Pokazuje język i tytuł ścieżki',
+                        'Formatowanie w czytelnej tabeli'
+                    ];
+                    break;
+                case 'count':
+                    command = `for i in {${startEpisode.toString().padStart(2, '0')}..${endEpisode.toString().padStart(2, '0')}}; do count=$(ffprobe -v error -select_streams s -show_entries stream=codec_type -of csv=p=0 "${inputTemplate.replace('{}', '${i}')}" 2>/dev/null | wc -l); echo "Odcinek \${i}: \${count} ścieżek napisów"; done`;
+                    explanation = [
+                        'Liczy tylko liczbę ścieżek napisów w każdym pliku',
+                        'Najszybsza opcja sprawdzania',
+                        'Pomija błędy dla nieistniejących plików',
+                        'Idealny do szybkiego przeglądu kolekcji'
+                    ];
+                    break;
+            }
+
+            document.getElementById('commandOutput').innerHTML = `<button class="copy-btn" onclick="copyCommand()">📋 Kopiuj</button>${command}`;
+            
+            const explanationList = document.getElementById('explanationList');
+            explanationList.innerHTML = '';
+            explanation.forEach(item => {
+                const li = document.createElement('li');
+                li.textContent = item;
+                explanationList.appendChild(li);
+            });
+
+            document.getElementById('outputSection').classList.remove('hidden');
+            document.getElementById('outputSection').scrollIntoView({ behavior: 'smooth' });
+        }
 
         function initializeCustomParams() {
             // Dodaj event listenery do opcji parametrów
