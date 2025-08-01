@@ -1,37 +1,126 @@
-function updatePlaceholders() {
-            const isWindows = currentOS === 'windows';
-            
-            // Update file input placeholders based on OS
-            const placeholders = {
-                // Zmieniamy ścieżki dla macOS
-                'sub-input-file': isWindows ? 'C:\\Videos\\film.mkv' : '/Users/chottodare/Desktop/nazwaFOLDERU/film.mkv',
-                'sub-output-file': isWindows ? 'C:\\Videos\\napisy.srt' : '/Users/chottodare/Desktop/nazwaFOLDERU/napisy.srt',
-                'conv-input-file': isWindows ? 'C:\\Videos\\film.mkv' : '/Users/chottodare/Desktop/nazwaFOLDERU/film.mkv', 
-                'conv-output-file': isWindows ? 'C:\\Videos\\film.mp4' : '/Users/chottodare/Desktop/nazwaFOLDERU/film.mp4',
-                'audio-input-file': isWindows ? 'C:\\Videos\\film.mkv' : '/Users/chottodare/Desktop/nazwaFOLDERU/film.mkv',
-                'audio-output-file': isWindows ? 'C:\\Videos\\audio.mp3' : '/Users/chottodare/Desktop/nazwaFOLDERU/audio.mp3',
-                'cut-input-file': isWindows ? 'C:\\Videos\\film.mkv' : '/Users/chottodare/Desktop/nazwaFOLDERU/film.mkv',
-                'cut-output-file': isWindows ? 'C:\\Videos\\fragment.mp4' : '/Users/chottodare/Desktop/nazwaFOLDERU/fragment.mp4',
-                'merge-files': isWindows ? 'C:\\Videos\\film1.mp4,C:\\Videos\\film2.mp4' : '/Users/chottodare/Desktop/nazwaFOLDERU/film1.mp4,/Users/chottodare/Desktop/nazwaFOLDERU/film2.mp4',
-                'merge-output-file': isWindows ? 'C:\\Videos\\połączone.mp4' : '/Users/chottodare/Desktop/nazwaFOLDERU/połączone.mp4',
-                'add-sub-video-file': isWindows ? 'C:\\Videos\\film.mp4' : '/Users/chottodare/Desktop/nazwaFOLDERU/film.mp4',
-                'add-sub-subtitle-file': isWindows ? 'C:\\Videos\\napisy.srt' : '/Users/chottodare/Desktop/nazwaFOLDERU/napisy.srt',
-                'add-sub-output-file': isWindows ? 'C:\\Videos\\film_z_napisami.mp4' : '/Users/chottodare/Desktop/nazwaFOLDERU/film_z_napisami.mp4'
-            };
-            
-            // Update all placeholders
-            Object.keys(placeholders).forEach(id => {
-                const element = document.getElementById(id);
-                if (element) {
-                    element.placeholder = placeholders[id];
-                    // Zaktualizuj wartość tylko jeśli jest to wartość domyślna lub zawiera starą ścieżkę
-                    // Tutaj decydujesz, czy chcesz zawsze ustawiać pełną ścieżkę, czy tylko nazwę pliku.
-                    // Jeżeli chcesz pełną ścieżkę w polu value, użyj:
-                    // element.value = placeholders[id];
-                    // Jeżeli chcesz samą nazwę pliku, jak to jest obecnie, pozostaw:
-                    if (element.value === '' || element.value.includes('~/Movies/') || element.value.includes('C:\\Videos\\')) {
-                        element.value = placeholders[id].split(/[\/\\]/).pop(); 
-                    }
-                }
-            });
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FFmpeg Tools Collection</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            padding: 30px;
+        }
+
+        .tool-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            border: 3px solid transparent;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .tool-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+            border-color: #667eea;
+        }
+
+        .tool-card h2 {
+            color: #2a5298;
+            margin-bottom: 10px;
+            font-size: 1.5em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .tool-card p {
+            color: #666;
+            line-height: 1.5;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+            border-top: 1px solid #eee;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎬 FFmpeg Tools Collection</h1>
+            <p>Zestaw narzędzi do pracy z plikami multimedialnymi</p>
+        </div>
+
+        <div class="tools-grid">
+            <a href="ffmpeg-gui.html" class="tool-card">
+                <h2>🎮 FFmpeg GUI Generator</h2>
+                <p>Interaktywny generator komend FFmpeg z intuicyjnym interfejsem. Konwertuj, wycinaj i łącz pliki wideo bez znajomości składni.</p>
+            </a>
+
+            <a href="universal-video-converter-ffmpeg.html" class="tool-card">
+                <h2>🔄 Universal Video Converter</h2>
+                <p>Uniwersalny konwerter wideo wykorzystujący FFmpeg. Zaawansowane opcje konwersji z presetami jakości.</p>
+            </a>
+
+            <a href="macos_terminal_flashcards.html" class="tool-card">
+                <h2>💻 Terminal Flashcards</h2>
+                <p>Ucz się komend terminala macOS poprzez interaktywne fiszki. Idealne dla początkujących.</p>
+            </a>
+        </div>
+
+        <div class="footer">
+            <p>© 2025 FFmpeg Tools Collection</p>
+        </div>
+    </div>
+</body>
+</html>
